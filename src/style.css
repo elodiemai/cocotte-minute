@@ -1,0 +1,226 @@
+:root {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --ink: #3b2a1a;
+  --muted: #8a7560;
+  --accent: #ff7a45;
+  --accent-ink: #ffffff;
+  --yolk: #ffb300;
+  --line: #f0e2c8;
+  --water: #9fd8f0;
+  --pot: #5b6b7a;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Fredoka', system-ui, sans-serif;
+  transition: background 0.6s;
+}
+body[data-phase='done'] { background: color-mix(in srgb, var(--yolk) 25%, var(--bg)); }
+
+.app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: grid;
+  gap: 24px;
+  text-align: center;
+}
+
+h1 { margin: 0; font-size: 2.2rem; }
+.subtitle { margin: 4px 0 0; color: var(--muted); }
+
+/* ---------- Stage: chicken + pot ---------- */
+.stage {
+  position: relative;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.chicken { width: 180px; overflow: visible; }
+.chicken .torso, .chicken .face { fill: #fff; stroke: var(--ink); stroke-width: 3; }
+.chicken .tail, .chicken .wing { fill: #f3ece0; stroke: var(--ink); stroke-width: 3; }
+.chicken .comb, .chicken .wattle { fill: #e53935; stroke: var(--ink); stroke-width: 2.5; }
+.chicken .beak { fill: var(--accent); stroke: var(--ink); stroke-width: 2.5; stroke-linejoin: round; }
+.chicken .eye circle:first-child { fill: var(--ink); }
+.chicken .shine { fill: #fff; }
+.chicken .cheek { fill: #ff8a80; opacity: 0.6; }
+.chicken .legs path { stroke: var(--accent); stroke-width: 4; stroke-linecap: round; fill: none; }
+
+.chicken .body, .chicken .head, .chicken .wing, .chicken .eye {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+.chicken .wing { transform-origin: left center; }
+
+/* idle: gentle bob + blink */
+.chicken.idle .body { animation: bob 2.4s ease-in-out infinite; }
+.chicken .eye { animation: blink 4s infinite; transform-origin: center; }
+
+/* cooking: pecking head, flapping wing */
+.chicken.cooking .head { animation: peck 1.2s ease-in-out infinite; }
+.chicken.cooking .wing { animation: flap 0.6s ease-in-out infinite; }
+.chicken.panic .body { animation: shake 0.25s linear infinite; }
+.chicken.panic .wing { animation-duration: 0.15s; }
+
+.chicken.paused .body { transform: rotate(-4deg); }
+
+/* done: happy jumps */
+.chicken.done .body, .chicken.done .legs { animation: hop 0.5s ease-in-out infinite alternate; }
+.chicken.done .wing { animation: flap 0.2s ease-in-out infinite; }
+
+@keyframes bob { 50% { transform: translateY(-4px); } }
+@keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes peck { 50% { transform: rotate(14deg) translate(4px, 6px); } }
+@keyframes flap { 50% { transform: rotate(-25deg); } }
+@keyframes shake { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+@keyframes hop { to { transform: translateY(-18px); } }
+
+.pot {
+  position: relative;
+  width: 120px;
+  height: 80px;
+  margin-bottom: 8px;
+  background: linear-gradient(var(--water) 0 30%, var(--pot) 30%);
+  border: 4px solid var(--ink);
+  border-radius: 8px 8px 28px 28px;
+}
+.pot::before, .pot::after {
+  content: '';
+  position: absolute;
+  top: 26px;
+  width: 16px;
+  height: 10px;
+  border: 4px solid var(--ink);
+  border-radius: 6px;
+  background: var(--pot);
+}
+.pot::before { left: -22px; }
+.pot::after { right: -22px; }
+
+.bubbles span {
+  position: absolute;
+  bottom: 56px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--water);
+  border: 2px solid var(--ink);
+  opacity: 0;
+}
+.bubbles span:nth-child(1) { left: 14px; }
+.bubbles span:nth-child(2) { left: 42px; animation-delay: 0.3s !important; }
+.bubbles span:nth-child(3) { left: 70px; animation-delay: 0.6s !important; }
+.bubbles span:nth-child(4) { left: 92px; animation-delay: 0.9s !important; }
+.pot.boiling .bubbles span { animation: bubble 1.2s ease-in infinite; }
+@keyframes bubble {
+  0% { opacity: 0; transform: translateY(0) scale(0.5); }
+  30% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
+}
+
+/* ---------- Picker ---------- */
+.picker { display: grid; gap: 14px; }
+
+.egg-types {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.egg-card {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 14px 8px;
+  background: var(--card);
+  color: var(--ink);
+  border: 3px solid var(--line);
+  border-radius: 20px;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+}
+.egg-card:hover:not(:disabled) { transform: translateY(-3px); }
+.egg-card[aria-checked='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 6px 0 var(--accent);
+  transform: translateY(-3px);
+}
+.egg-card:disabled { cursor: not-allowed; opacity: 0.55; }
+.egg-card[aria-checked='true']:disabled { opacity: 1; }
+
+.egg-icon { width: 48px; height: 56px; }
+.egg-card[aria-checked='true'] .egg-icon { animation: wobble 0.5s ease; }
+@keyframes wobble { 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } }
+
+.egg-card strong { font-size: 1.05rem; }
+.minutes { color: var(--accent); font-weight: 700; }
+.egg-card small { color: var(--muted); font-size: 0.75rem; line-height: 1.2; }
+
+.sizes { display: flex; justify-content: center; gap: 8px; }
+.chip {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 2px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.chip[aria-checked='true'] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip:disabled { cursor: not-allowed; opacity: 0.55; }
+
+/* ---------- Timer ---------- */
+.timer { display: grid; justify-items: center; gap: 16px; }
+
+.ring { position: relative; width: 200px; height: 200px; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 10; }
+.ring .track { stroke: var(--line); }
+.ring .progress {
+  stroke: var(--yolk);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.25s linear;
+}
+.readout {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+}
+.time { font-size: 2.8rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.status { color: var(--muted); }
+
+.controls { display: flex; gap: 10px; }
+.btn {
+  padding: 12px 28px;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  border: 3px solid var(--ink);
+  transition: transform 0.1s;
+}
+.btn:active { transform: translateY(2px); }
+.btn.primary { background: var(--accent); color: var(--accent-ink); box-shadow: 0 4px 0 var(--ink); }
+.btn.ghost { background: transparent; color: var(--ink); }
+
+@media (max-width: 420px) {
+  .egg-card small { display: none; }
+  .chicken { width: 140px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

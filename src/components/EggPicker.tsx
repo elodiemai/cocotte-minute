@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { EggType } from '../eggs';
 
 interface EggPickerProps {
@@ -23,9 +24,10 @@ function EggIcon({ white, yolk }: Pick<EggType, 'white' | 'yolk'>) {
   );
 }
 
+// Starter selection: each cooking style is also a creature "type"
 export default function EggPicker({ eggs, selected, onSelect, disabled }: EggPickerProps) {
   return (
-    <div className="egg-types" role="radiogroup">
+    <div className="egg-types" role="radiogroup" aria-label="Œuf de départ">
       {eggs.map((egg) => (
         <button
           key={egg.id}
@@ -34,7 +36,9 @@ export default function EggPicker({ eggs, selected, onSelect, disabled }: EggPic
           aria-checked={egg.id === selected.id}
           disabled={disabled}
           onClick={() => onSelect(egg)}
+          style={{ '--type': egg.starter.color } as CSSProperties}
         >
+          <span className="type-badge">{egg.starter.type}</span>
           <EggIcon {...egg} />
           <strong>{egg.name}</strong>
           <span className="minutes">{egg.seconds / 60} min</span>

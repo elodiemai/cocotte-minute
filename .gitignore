@@ -17,11 +17,21 @@ dist-ssr/
 *.tsbuildinfo
 .eslintcache
 
+# Logs and test output
+*.log
+coverage/
+
 # Local env and tooling
 .env
-.env.*.local
+.env.*
+!.env.example
 *.local
+.vercel/
+.claude/
 .playwright-mcp/
+
+# Earlier prototypes kept locally for reference (not part of the app)
+prototypes/
 
 # Editor / OS
 .vscode/*

@@ -1,28 +1,48 @@
 # Cocotte Minute — egg timer prototype
 
-A single-page prototype for timing eggs (à la coque, mollet, dur). React + Vite + TypeScript.
+An egg timer where the egg you cook hatches into a surprise creature. React + Vite + TypeScript, 3D with
+three.js (React Three Fiber).
 
 ```sh
 npm install
-npm run dev     # http://localhost:5173
+npm run dev         # http://localhost:5173, test mode on (30 s cook)
+npm run lint        # ESLint: typescript-eslint, React Hooks, React Refresh
 npm run typecheck   # tsc, no emit; also runs as part of npm run build
 ```
+
+**Test mode:** every cook lasts 30 seconds, so you can try the hatching without waiting. It's on by default with
+`npm run dev` and off in production builds. Force it with `?test=1` or turn it off with `?test=0` in the URL.
+
+## How it plays
+
+1. **Choose a starter egg**: each cooking style is a creature type. *À la coque* is Coulant, *Mollet* is
+   Crémeux, and *Dur* is Costaud.
+2. **Follow the steps**: each step is a checkbox. Tick the first two (boil the water, put the egg in
+   simmering water), then press *C'est parti !* in the "Laisse cuire" step: the timer runs inside that step.
+3. **Incubation**: the egg cracks more as the timer runs. Tap it to comfort it: each hug raises the
+   chance of a shiny ("chromatique") creature, from 3 % up to 50 %.
+4. **Hatching**: when the timer rings, white silhouettes flash faster and faster (like a Pokémon evolution),
+   then the creature is revealed. Each type has three creatures; there is a 15 % chance of one from
+   another type. The final cooking step (serve, or plunge into cold water) still shows.
 
 ## Structure
 
 | File | Role |
 | --- | --- |
-| `src/App.tsx` | Page layout; wires the selected egg and size to the timer |
+| `src/App.tsx` | Page flow: maps the timer phase to the stage (`prep → cook → serve`) and rolls the creature |
 | `src/useEggTimer.ts` | Timer state machine hook (`idle → running ⇄ paused → done`) |
-| `src/eggs.ts` | Egg types, cooking times, and size offsets. Edit this to change the options |
-| `src/components/Chicken.tsx` | Inline SVG mascot (each body part has a class so it can be animated) |
-| `src/components/` | Also `Pot`, `EggPicker`, `SizePicker`, and `TimerRing` |
-| `src/cluck.ts` | WebAudio "cot-cot" played when the timer ends |
-| `src/style.css` | Theme tokens, mascot animations per state, and the picker/timer UI |
+| `src/eggs.ts` | Egg types, cooking times, size offsets, serving step, and starter type |
+| `src/creatures.ts` | The nine species, hatch odds, and shiny odds |
+| `src/steps.ts` | The cooking instructions |
+| `src/testMode.ts` | 30-second test mode switch |
+| `src/scene/Scene.tsx` | Kitchen scene: Cocotte, the pot, speech bubble, hearts |
+| `src/scene/IncubatingEgg.tsx` | Egg in the pot: cracks, tap to wiggle, hatching sequence |
+| `src/scene/Creature3D.tsx` | The creatures, built from primitives |
+| `src/scene/Toon.tsx` | Shared cartoon look: toon shading + "inverted hull" ink outlines |
+| `src/components/` | Starter picker, size picker, timer ring, steps checklist (hosts the timer) |
 
-`<Chicken phase panic />` turns the timer phase into a CSS class (`idle`, `cooking`, `panic`, `paused`, `done`).
-To swap in another asset (a sprite sheet, Lottie, Rive, or 3D model), reimplement `Chicken.tsx` with the same
-props. For example, `@rive-app/react-canvas`, `@lottiefiles/dotlottie-react`, or `@splinetool/react-spline`.
+All characters are built from primitives, so a modelled GLB (e.g. from Spline or Poly Pizza) can replace any of
+them as long as it reads the same props.
 
 ## Asset resources
 

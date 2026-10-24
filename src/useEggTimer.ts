@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
 export type Phase = 'idle' | 'running' | 'paused' | 'done';
 
@@ -13,8 +13,8 @@ export function useEggTimer(totalMs: number, onFinish?: () => void) {
   const [phase, setPhase] = useState<Phase>('idle');
   const [remainingMs, setRemainingMs] = useState(totalMs);
   const endsAt = useRef(0);
-  const onFinishRef = useRef(onFinish);
-  onFinishRef.current = onFinish;
+  // Always calls the latest onFinish without restarting the interval
+  const finish = useEffectEvent(() => onFinish?.());
 
   useEffect(() => {
     if (phase !== 'running') return;
@@ -23,7 +23,7 @@ export function useEggTimer(totalMs: number, onFinish?: () => void) {
       if (left <= 0) {
         setRemainingMs(0);
         setPhase('done');
-        onFinishRef.current?.();
+        finish();
       } else {
         setRemainingMs(left);
       }
